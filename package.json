@@ -1,0 +1,21 @@
+{
+  "name": "fuse-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "start": "npm run build:live",
+    "build": "tsc -p .",
+    "build:live": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts"
+  },
+  "author": "Kristupas Stumbrys",
+  "license": "ISC",
+  "dependencies": {
+    "fuse.js": "^3.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.9",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.2.2"
+  }
+}
