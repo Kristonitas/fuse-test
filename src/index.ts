@@ -66,8 +66,10 @@ const options = {
     maxPatternLength: 32,
     minMatchCharLength: 1,
     keys: [
-        "name", "alias", "description"
-    ] as EntryKeys[]
+        { name: "name", weight: 0.8 },
+        { name: "alias", weight: 0.5 },
+        { name: "description", weight: 0.2 }
+    ] as { name: EntryKeys, weight: number }[]
 };
 
 const searchQuery = "Distance";
