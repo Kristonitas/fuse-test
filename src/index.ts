@@ -1,193 +1,95 @@
-import Fuse from 'fuse.js';
+import Fuse from "fuse.js";
+
+type Adventure = {
+    name: string;
+    length: number;
+    ascent: number;
+    descent: number;
+    profile: number[];
+};
 
 type Entry = {
-    title: string;
-    author: {
-        firstName: string;
-        lastName: string;
-    }
+    name: string;
+    alias?: string[];
+    description?: string;
+    value: (adventure: Adventure) => string;
+    action?: (adventure: Adventure) => void;
 }
 
-type EntryKeys = keyof Entry;
+type EntryKeys = "name" | "alias" | "description";
 
 const list = [
     {
-        title: "Old Man's War",
-        author: {
-            firstName: "John",
-            lastName: "Scalzi"
+        name: "Name",
+        alias: ["Title"],
+        value: (adventure: Adventure) => {
+            return adventure.name;
         }
     },
     {
-        title: "The Lock Artist",
-        author: {
-            firstName: "Steve",
-            lastName: "Hamilton"
+        name: "Length",
+        alias: ["Size", "Distance"],
+        value: (adventure: Adventure) => {
+            return adventure.length.toFixed(0) + "m";
         }
     },
     {
-        title: "HTML5",
-        author: {
-            firstName: "Remy",
-            lastName: "Sharp"
+        name: "Ascent",
+        alias: ["Elevation gain"],
+        value: (adventure: Adventure) => {
+            return adventure.ascent.toFixed(0) + "m";
         }
     },
     {
-        title: "Right Ho Jeeves",
-        author: {
-            firstName: "P.D",
-            lastName: "Woodhouse"
+        name: "Lowest point",
+        value: (adventure: Adventure) => {
+            const lowestPoint = Math.min.apply(null, adventure.profile)
+            return lowestPoint.toFixed(0) + "m";
         }
     },
     {
-        title: "The Code of the Wooster",
-        author: {
-            firstName: "P.D",
-            lastName: "Woodhouse"
-        }
-    },
-    {
-        title: "Thank You Jeeves",
-        author: {
-            firstName: "P.D",
-            lastName: "Woodhouse"
-        }
-    },
-    {
-        title: "The DaVinci Code",
-        author: {
-            firstName: "Dan",
-            lastName: "Brown"
-        }
-    },
-    {
-        title: "Angels & Demons",
-        author: {
-            firstName: "Dan",
-            lastName: "Brown"
-        }
-    },
-    {
-        title: "The Silmarillion",
-        author: {
-            firstName: "J.R.R",
-            lastName: "Tolkien"
-        }
-    },
-    {
-        title: "Syrup",
-        author: {
-            firstName: "Max",
-            lastName: "Barry"
-        }
-    },
-    {
-        title: "The Lost Symbol",
-        author: {
-            firstName: "Dan",
-            lastName: "Brown"
-        }
-    },
-    {
-        title: "The Book of Lies",
-        author: {
-            firstName: "Brad",
-            lastName: "Meltzer"
-        }
-    },
-    {
-        title: "Lamb",
-        author: {
-            firstName: "Christopher",
-            lastName: "Moore"
-        }
-    },
-    {
-        title: "Fool",
-        author: {
-            firstName: "Christopher",
-            lastName: "Moore"
-        }
-    },
-    {
-        title: "Incompetence",
-        author: {
-            firstName: "Rob",
-            lastName: "Grant"
-        }
-    },
-    {
-        title: "Fat",
-        author: {
-            firstName: "Rob",
-            lastName: "Grant"
-        }
-    },
-    {
-        title: "Colony",
-        author: {
-            firstName: "Rob",
-            lastName: "Grant"
-        }
-    },
-    {
-        title: "Backwards, Red Dwarf",
-        author: {
-            firstName: "Rob",
-            lastName: "Grant"
-        }
-    },
-    {
-        title: "The Grand Design",
-        author: {
-            firstName: "Stephen",
-            lastName: "Hawking"
-        }
-    },
-    {
-        title: "The Book of Samson",
-        author: {
-            firstName: "David",
-            lastName: "Maine"
-        }
-    },
-    {
-        title: "The Preservationist",
-        author: {
-            firstName: "David",
-            lastName: "Maine"
-        }
-    },
-    {
-        title: "Fallen",
-        author: {
-            firstName: "David",
-            lastName: "Maine"
-        }
-    },
-    {
-        title: "Monster 1959",
-        author: {
-            firstName: "David",
-            lastName: "Maine"
+        name: "Show adventure",
+        alias: ["Fly to", "focus"],
+        value: (adventure: Adventure) => {
+            const lowestPoint = Math.min.apply(null, adventure.profile)
+            return lowestPoint.toFixed(0);
         }
     }
 ] as Entry[];
 
 const options = {
     shouldSort: true,
-    threshold: 0.6,
+    includeMatches: true,
+    threshold: 0.3,
     location: 0,
     distance: 100,
     maxPatternLength: 32,
     minMatchCharLength: 1,
     keys: [
-        "title"
+        "name", "alias", "description"
     ] as EntryKeys[]
 };
 
+const searchQuery = "Distance";
 const fuse = new Fuse(list, options);
+const results = (fuse.search(searchQuery) as any[]) as { item: Entry, matches: any[] }[];
+const adventure = {
+    name: "Day 4 - TMB Intégral. Les Chapieux to Courmayeur",
+    length: 20908,
+    ascent: 1086,
+    descent: 965
+} as Adventure;
 
-const result = fuse.search("Fall");
-
-console.log(result);
+console.log("Searching properties of: " + adventure.name);
+console.log("Search query: " + searchQuery);
+console.log("Found results: " + results.length);
+console.group("Top match:");
+if (results.length) {
+    const item = results[0].item;
+    const match = results[0].matches[0];
+    console.log("Property: " + item.name);
+    item.description && console.log(item.description);
+    console.log("Matched by: " + match.value + " in Entry." + match.key + (match.key == "alias" ? ("[" + match.arrayIndex + "]") : ""));
+    console.log("Value: " + item.value(adventure));
+}
+console.groupEnd();
